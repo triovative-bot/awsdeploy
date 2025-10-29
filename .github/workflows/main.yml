@@ -15,10 +15,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.5
+      - name: Install Terraform manually
+        run: |
+          sudo apt update -y
+          sudo apt install -y wget unzip
+          wget https://releases.hashicorp.com/terraform/1.13.4/terraform_1.13.4_linux_amd64.zip
+          unzip terraform_1.13.4_linux_amd64.zip
+          sudo mv terraform /usr/local/bin/
+          terraform -version
 
       - name: Terraform Init
         run: terraform init
