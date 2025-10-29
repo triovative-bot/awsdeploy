@@ -5,8 +5,11 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+}
+   # 👇 Local backend (stores terraform.tfstate locally)
+  backend "local" {
+    path = "terraform.tfstate"
   }
-  backend "s3" {} # (optional) You can configure remote state later
 }
 
 provider "aws" {
