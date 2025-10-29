@@ -1,64 +1,47 @@
-provider "aws" {
-  region = var.aws_region
-}
-
-# --- VPC ---
+# VPC
 resource "aws_vpc" "main" {
-  cidr_block           = var.vpc_cidr
-  enable_dns_support   = true
-  enable_dns_hostnames = true
+  cidr_block = var.vpc_cidr
   tags = {
-    Name = "${var.project_name}-vpc"
+    Name = "tf-vpc"
   }
 }
 
-# --- Subnet ---
+# Subnet
 resource "aws_subnet" "main" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = var.subnet_cidr
-  availability_zone       = var.availability_zone
   map_public_ip_on_launch = true
   tags = {
-    Name = "${var.project_name}-subnet"
+    Name = "tf-subnet"
   }
 }
 
-# --- Internet Gateway ---
-resource "aws_internet_gateway" "main" {
+# Internet Gateway
+resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
-  tags = {
-    Name = "${var.project_name}-igw"
-  }
 }
 
-# --- Route Table ---
-resource "aws_route_table" "main" {
+# Route Table
+resource "aws_route_table" "rt" {
   vpc_id = aws_vpc.main.id
-
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.main.id
-  }
-
-  tags = {
-    Name = "${var.project_name}-route-table"
+    gateway_id = aws_internet_gateway.gw.id
   }
 }
 
-# --- Route Table Association ---
 resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.main.id
-  route_table_id = aws_route_table.main.id
+  route_table_id = aws_route_table.rt.id
 }
 
-# --- Security Group ---
+# Security Group
 resource "aws_security_group" "vm_sg" {
-  name        = "${var.project_name}-sg"
-  description = "Allow SSH and ICMP"
+  name        = "vm-sg"
+  description = "Allow SSH and HTTP"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description = "SSH access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -66,10 +49,9 @@ resource "aws_security_group" "vm_sg" {
   }
 
   ingress {
-    description = "Ping"
-    from_port   = -1
-    to_port     = -1
-    protocol    = "icmp"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -79,22 +61,17 @@ resource "aws_security_group" "vm_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Name = "${var.project_name}-sg"
-  }
 }
 
-# --- EC2 Instance ---
+# EC2 Instance
 resource "aws_instance" "vm" {
-  ami                         = var.ami_id
-  instance_type               = var.instance_type
-  subnet_id                   = aws_subnet.main.id
-  vpc_security_group_ids       = [aws_security_group.vm_sg.id]
-  associate_public_ip_address = true
-  key_name                    = var.key_name
+  ami                    = var.ami_id
+  instance_type          = var.instance_type
+  subnet_id              = aws_subnet.main.id
+  vpc_security_group_ids = [aws_security_group.vm_sg.id]
+  key_name               = var.key_name
 
   tags = {
-    Name = "${var.project_name}-vm"
+    Name = "tf-ec2-instance"
   }
 }
