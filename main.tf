@@ -81,14 +81,13 @@ resource "local_file" "private_key" {
   filename = "${path.module}/tf-ec2-key.pem"
 }
 
-
 # EC2 Instance
 resource "aws_instance" "vm" {
   ami                    = var.ami_id
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.vm_sg.id]
-  key_name               = var.key_name
+  key_name               = aws_key_pair.deployer_key.key_name
 
   tags = {
     Name = "tf-ec2-instance"
