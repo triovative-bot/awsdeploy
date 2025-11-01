@@ -63,6 +63,25 @@ resource "aws_security_group" "vm_sg" {
   }
 }
 
+# Generate a new SSH key pair
+resource "tls_private_key" "key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+# Create AWS key pair using the generated public key
+resource "aws_key_pair" "deployer_key" {
+  key_name   = "tf-ec2-key"
+  public_key = tls_private_key.key.public_key_openssh
+}
+
+# Save private key locally (optional but useful)
+resource "local_file" "private_key" {
+  content  = tls_private_key.key.private_key_pem
+  filename = "${path.module}/tf-ec2-key.pem"
+}
+
+
 # EC2 Instance
 resource "aws_instance" "vm" {
   ami                    = var.ami_id
