@@ -88,7 +88,6 @@ resource "aws_instance" "vm" {
   subnet_id              = aws_subnet.main.id
   vpc_security_group_ids = [aws_security_group.vm_sg.id]
   key_name               = aws_key_pair.deployer_key.key_name
-  free-tier-eligible     = true
 
   tags = {
     Name = "tf-ec2-instance"
