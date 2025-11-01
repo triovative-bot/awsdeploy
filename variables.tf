@@ -43,4 +43,5 @@ variable "ami_id" {
 variable "key_name" {
   description = "EC2 key pair name"
   type        = string
+  default     = "my-ec2-key"
 }
