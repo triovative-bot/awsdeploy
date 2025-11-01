@@ -90,6 +90,6 @@ resource "aws_instance" "vm" {
   key_name               = aws_key_pair.deployer_key.key_name
 
   tags = {
-    Name = "tf-ec2-instance"
+    Name = "free-tier-vm"
   }
 }
